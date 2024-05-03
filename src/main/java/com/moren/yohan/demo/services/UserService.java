@@ -15,4 +15,8 @@ public interface UserService {
     Optional<User> getUserById(Long id);
 
     void deleteUser(User user);
+
+    Optional<User> findByEmail(String email);
+
+    Object validateAccount(String email, String code);
 }

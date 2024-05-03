@@ -6,6 +6,8 @@ import com.moren.yohan.demo.models.User;
 
 public interface AuthService {
     String login(Admin admin, String password);
+
+    String login(User user, String password);
     User registerUser(User entity, Role role);
 
     Admin registerAdmin(Admin admin, Role role);

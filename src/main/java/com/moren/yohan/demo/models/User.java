@@ -1,5 +1,6 @@
 package com.moren.yohan.demo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -42,6 +43,9 @@ public class User implements UserDetails {
     @Size(min = 3, max = 50, message = "Email must be between 3 and 50 characters")
     @Column(unique = true)
     private String email;
+
+    @JsonIgnore
+    private String validateCode;
 
 
     private Boolean isAccountValid = false;

@@ -1,5 +1,6 @@
 package com.moren.yohan.demo.security;
 
+import com.moren.yohan.demo.models.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,9 +25,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(registry -> {
-            registry.requestMatchers("/**").permitAll()
-//                    .requestMatchers(HttpMethod.POST, "/admin/**").hasRole("ADMIN")
-                    .anyRequest().authenticated();
+            registry
+                   // .requestMatchers("/admin/**").hasRole(Role.RoleEnum.ADMIN.name())
+                    .requestMatchers(HttpMethod.POST, "/admin/login", "/admin/register").permitAll()
+                    .requestMatchers("/**").permitAll().anyRequest().authenticated();
         }).authenticationProvider(authenticationProvider).addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
     }
 }
