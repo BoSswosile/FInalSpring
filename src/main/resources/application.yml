@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: SecurityPart2
+  datasource:
+    url: jdbc:mysql://localhost:3306/examen
+    username: root
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+  output:
+    ansi:
+      enabled: ALWAYS
