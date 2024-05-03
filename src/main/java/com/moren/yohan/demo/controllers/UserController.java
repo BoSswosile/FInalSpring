@@ -3,13 +3,22 @@ package com.moren.yohan.demo.controllers;
 import com.moren.yohan.demo.models.Admin;
 import com.moren.yohan.demo.models.User;
 import com.moren.yohan.demo.repositories.UserRepo;
+import com.moren.yohan.demo.requests.ChangePasswordRequest;
+import com.moren.yohan.demo.requests.LoginRequest;
+import com.moren.yohan.demo.security.JwtService;
 import com.moren.yohan.demo.services.AuthService;
 import com.moren.yohan.demo.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 import java.util.Map;
 import java.util.Optional;
@@ -30,9 +39,13 @@ public class UserController {
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
+    JwtService jwtService;
+
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
+    @Operation(summary = "Login", description = "Login with email and password", requestBody = @RequestBody(content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoginRequest.class))))
+    public ResponseEntity<?> login(@org.springframework.web.bind.annotation.RequestBody Map<String, String> request) {
         String email = request.get("email");
         String password = request.get("password");
         Optional<User> user = userRepo.findByEmail(email);
@@ -49,21 +62,26 @@ public class UserController {
         }
         return new ResponseEntity<>(userService.validateAccount(email, code), HttpStatus.OK);
     }
-// does not work because of the empty password
+
+    // does not work because of the empty password
     @PutMapping("/users")
-    public ResponseEntity<?> updateUserCredentials(@RequestBody User user, @RequestBody String newPassword) {
-        if (user == null) {
-            return new ResponseEntity<>("User is not valid", HttpStatus.BAD_REQUEST);
+    @Operation(summary = "ResetPassword", description = "Change password using the old password and the new password", requestBody = @RequestBody(content = @Content(mediaType = "application/json", schema = @Schema(implementation = ChangePasswordRequest.class))))
+    public ResponseEntity<?> updateUserCredentials(@RequestHeader("Authorization") String jwt, @org.springframework.web.bind.annotation.RequestBody Map<String, String> request) {
+        String password = request.get("password");
+        String newPassword = request.get("newPassword");
+        if (password == null || newPassword == null) {
+            return new ResponseEntity<>("Password or new password not found", HttpStatus.BAD_REQUEST);
         }
-        // Need to compare both passwords
-        Optional<User> userToUpdate = userRepo.findByEmail(user.getEmail());
+        jwt = jwt.replace("Bearer ", "");
+        String email = jwtService.extractUsername(jwt);
+        Optional<User> userToUpdate = userRepo.findByEmail(email);
         if (userToUpdate.isEmpty()) {
             return new ResponseEntity<>("User does not exist", HttpStatus.NOT_FOUND);
         }
-        if (!bCryptPasswordEncoder.matches(user.getPassword(), userToUpdate.get().getPassword())) {
+        if (!bCryptPasswordEncoder.matches(password, userToUpdate.get().getPassword())) {
             return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
         }
-        user.setPassword(newPassword);
-        return new ResponseEntity<>(userService.updateUser(user), HttpStatus.OK);
+        userToUpdate.get().setPassword(bCryptPasswordEncoder.encode(newPassword));
+        return new ResponseEntity<>(userService.updateUser(userToUpdate.get()), HttpStatus.OK);
     }
 }

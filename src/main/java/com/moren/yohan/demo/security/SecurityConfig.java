@@ -26,7 +26,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(registry -> {
             registry
-                   // .requestMatchers("/admin/**").hasRole(Role.RoleEnum.ADMIN.name())
                     .requestMatchers(HttpMethod.POST, "/admin/login", "/admin/register").permitAll()
                     .requestMatchers("/**").permitAll().anyRequest().authenticated();
         }).authenticationProvider(authenticationProvider).addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class).build();

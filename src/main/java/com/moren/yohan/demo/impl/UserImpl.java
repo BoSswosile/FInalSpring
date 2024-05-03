@@ -24,7 +24,7 @@ public class UserImpl implements UserService {
     public User createUser(User entity) {
         int random = (int) (Math.random() * (999999 - 100000 + 1) + 100000);
         entity.setValidateCode(String.valueOf(random));
-        System.out.println("DEBUG LINK " + "localhost:8080/user/validate/" + entity.getEmail() + "/" + entity.getValidateCode());
+        System.out.println(" VALIDATE YOUR ACCOUNT LINK -> " + "localhost:8080/user/validate/" + entity.getEmail() + "/" + entity.getValidateCode());
         // send mail
         return userRepo.save(entity);
     }
@@ -62,5 +62,9 @@ public class UserImpl implements UserService {
         user.get().setValidateCode(null);
         userRepo.save(user.get());
         return "Account validated";
+    }
+    @Override
+    public User save(User user) {
+        return userRepo.save(user);
     }
 }

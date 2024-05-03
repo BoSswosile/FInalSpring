@@ -53,7 +53,7 @@ public class User implements UserDetails {
     @ManyToMany(fetch = FetchType.EAGER)
     List<Role> roles = new ArrayList<>();
 
-    @ManyToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Article> stock = new ArrayList<>();
 
     public void addRole(Role role) {

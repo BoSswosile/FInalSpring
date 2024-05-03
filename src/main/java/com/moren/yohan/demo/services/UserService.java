@@ -19,4 +19,6 @@ public interface UserService {
     Optional<User> findByEmail(String email);
 
     Object validateAccount(String email, String code);
+
+    User save (User user);
 }
